@@ -30,6 +30,8 @@ paths:
             Location:
               type: string
               description: The relative URL where the message can be retrieved.
+        default:
+          description: Unexpected error
     get:
       summary: Returns a list of all messages.
       parameters: 
@@ -72,6 +74,8 @@ paths:
             $ref: '#/definitions/Message'
         404:
           description: No message found by the provided ID.
+        default:
+          description: Unexpected error
 
 definitions:
   Message:

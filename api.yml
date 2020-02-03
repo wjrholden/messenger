@@ -1,0 +1,92 @@
+swagger: "2.0"
+
+info:
+  title: Simple Messenger API
+  description: An API for sending short text messages between individual users
+  version: 0.0.1
+
+host: 127.0.0.1
+basePath: /
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+
+paths:
+  /messages:
+    post:
+      summary: Creates a new message.
+      parameters:
+        - in: body
+          name: message
+          schema:
+            $ref: '#/definitions/Message'
+      responses:
+        201:
+          description: Created
+          headers:
+            Location:
+              type: string
+              description: The relative URL where the message can be retrieved.
+    get:
+      summary: Returns a list of all messages.
+      parameters: 
+        - in: query
+          name: recipient
+          type: string
+          description: An individual recipients user_name to retrieve messages by.
+        - in: query
+          name: limit
+          type: integer
+          description: A maximum number of messages to retrieve.
+        - in: query
+          name: range
+          type: string
+          description: A range of how many days previous to now to retrieve messages from, e.g. range=30d indicates "retrieve messages from the last 30 days"
+      responses:
+        200:
+          description: OK
+        400:
+          description: Bad Request. The provided ID is invalid.
+        404:
+          description: No messages found.
+        default:
+          description: Unexpected error
+
+  /messages/{message_id}:
+    get:
+      summary: Returns a message.
+      parameters:
+        - in: path
+          name: message_id
+          required: true
+          type: integer
+          minimum: 1
+          description: 
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Message'
+        404:
+          description: No message found by the provided ID.
+
+definitions:
+  Message:
+    properties:
+      id:
+        type: integer
+      sender:
+        type: string
+      recipient:
+        type: string
+      content:
+        type: string
+      date: 
+        type: string
+    required:
+      - sender
+      - recipient
+      - content

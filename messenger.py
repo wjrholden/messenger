@@ -1,8 +1,12 @@
-from flask import Flask
+import json
 
-app = Flask(__name__)
+import falcon
 
 
-@app.route('/messages')
-def handle_messages():
-	return 'messages handled'
+class MessengerResource(object):
+
+    def on_get(self, req, resp):
+        pass
+
+    def on_post(self, req, resp):
+        pass

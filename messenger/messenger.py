@@ -2,6 +2,11 @@ import json
 
 import falcon
 
+"""
+created with guidance from the Falcon quickstart guide:
+https://falcon.readthedocs.io/en/stable/user/quickstart.html
+"""
+
 
 class MessengerResource(object):
 

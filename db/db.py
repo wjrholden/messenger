@@ -2,7 +2,8 @@ import sqlite3
 from sqlite3 import Error
 
 """
-pulled from https://www.sqlitetutorial.net/sqlite-python/creating-database/
+implementation borrowed from SQLite tutorial for Python: 
+https://www.sqlitetutorial.net/sqlite-python/creating-database/
 """
 
  

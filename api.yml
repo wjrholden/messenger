@@ -40,6 +40,10 @@ paths:
           type: string
           description: An individual recipients user_name to retrieve messages by.
         - in: query
+          name: sender
+          type: string
+          description: An individual senders user_name to retrieve messages by.
+        - in: query
           name: limit
           type: integer
           description: A maximum number of messages to retrieve.

@@ -38,11 +38,11 @@ paths:
         - in: query
           name: recipient
           type: string
-          description: An individual recipients user_name to retrieve messages by.
+          description: An individual recipients user_name to retrieve messages by. If recipient is requested, sender is also required.
         - in: query
           name: sender
           type: string
-          description: An individual senders user_name to retrieve messages by.
+          description: An individual senders user_name to retrieve messages by. If sender is requested, recipient is also required.
         - in: query
           name: limit
           type: integer
@@ -92,7 +92,7 @@ definitions:
         type: string
       content:
         type: string
-      date: 
+      message_date:
         type: string
     required:
       - sender

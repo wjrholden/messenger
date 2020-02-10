@@ -2,15 +2,15 @@ import sqlite3
 from sqlite3 import Error
 
 """
-implementation borrowed from SQLite tutorial for Python:
+created with guidance from SQLite tutorial for Python:
 https://www.sqlitetutorial.net/sqlite-python/
 """
 
 
 def create_connection(db_file):
-    """ create a database connection to the SQLite database
-        specified by db_file
-    :param db_file: database file
+    """
+    create a database connection to the SQLite database specified by db_file
+    :param db_file: database file name
     :return: Connection object or None
     """
     conn = None
@@ -161,7 +161,20 @@ def select_user_id_by_name(conn, user_name):
     :param user_name: a users name (str)
     :return: the ID of the user or none
     """
-    sql_statement = "SELECT id FROM users WHERE name=?" 
+    sql_statement = "SELECT id FROM users WHERE name=?"
     query_params = (user_name, )
+    user_ids = _execute_query(conn, sql_statement, params=query_params)
+    return user_ids[0] if user_ids else None
+
+
+def select_user_name_by_id(conn, user_id):
+    """
+    Query user name by ID
+    :param conn: the DB connection
+    :param user_id: a user id
+    :return: the ID of the user or none
+    """
+    sql_statement = "SELECT name FROM users WHERE id=?"
+    query_params = (user_id, )
     user_ids = _execute_query(conn, sql_statement, params=query_params)
     return user_ids[0] if user_ids else None

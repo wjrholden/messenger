@@ -90,11 +90,11 @@ definitions:
         type: string
       recipient:
         type: string
-      content:
+      message:
         type: string
       message_date:
         type: string
     required:
       - sender
       - recipient
-      - content
+      - message

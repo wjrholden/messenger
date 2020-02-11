@@ -35,11 +35,13 @@ class MessengerResource():
         invalidate_no_recipient = 'sender' in req.params \
                                   and 'recipient' not in req.params
 
+        # if sender sent without recipient or recipient without sender, invalid
         if invalidate_no_recipient or invalidate_no_sender:
             resp.body = json.dumps({
                 "message": "sender AND recipient are required parameters"})
             resp.status = falcon.HTTP_400
 
+        # request for a specific message by it's ID
         if message_id:
             print(f"request received for message with ID: {message_id}")
             message = db.get_message_by_id(self.db_conn, message_id)
@@ -52,6 +54,8 @@ class MessengerResource():
                 resp.body = json.dumps({
                     "error": f"no messages found with ID: {message_id}"})
                 resp.status = falcon.HTTP_404
+
+        # no sender OR recipient query params --> get all messages
         elif not is_single_message_stream:
             print("retrieving all messages")
             messages = db.get_all_messages(self.db_conn)
@@ -67,6 +71,8 @@ class MessengerResource():
             if not messages:
                 resp.status = falcon.HTTP_404
                 resp.body = json.dumps({"error": "no messages in DB"})
+
+        # fall-through case is sender AND recipient params sent
         else:
             print("retrieving message stream for "\
                   f"sender[{req.params['sender']}] and "\
@@ -103,6 +109,7 @@ class MessengerResource():
         recipient_id = recipient_db_entry['id'] \
             if recipient_db_entry is not None else 0
 
+        # if sender or recipient haven't been users before, add them
         if not sender_id:
             sender_id = db.create_user(self.db_conn, message['sender'])
         if not recipient_id:

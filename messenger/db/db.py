@@ -33,7 +33,7 @@ def create_message(conn, msg):
     """
     cur = conn.cursor()
     cur.execute("INSERT INTO messages(sender_id,recipient_id,content) "
-                "VALUES(?,?,?)", 
+                "VALUES(?,?,?)",
                 (msg["sender_id"], msg["recipient_id"], msg["message"]))
     conn.commit()
     return cur.lastrowid

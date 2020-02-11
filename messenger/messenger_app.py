@@ -94,20 +94,25 @@ class MessengerResource():
         """
         message = req.media
         print(f"creating new message: {message}")
+        new_db_entry = {"message": message["message"]}
 
-        db_entry = {"message": message["message"]}
-        sender_id = db.select_user_id_by_name(
-            self.db_conn, message['sender'])['id']
-        recipient_id = db.select_user_id_by_name(
-            self.db_conn, message['recipient'])['id']
+        sender_db_entry = db.select_user_id_by_name(
+            self.db_conn, message['sender'])
+        sender_id = sender_db_entry['id'] if sender_db_entry is not None else 0
+        recipient_db_entry = db.select_user_id_by_name(
+            self.db_conn, message['recipient'])
+        recipient_id = recipient_db_entry['id'] \
+            if recipient_db_entry is not None else 0
+
         if not sender_id:
             sender_id = db.create_user(self.db_conn, message['sender'])
         if not recipient_id:
             recipient_id = db.create_user(self.db_conn, message['recipient'])
-        db_entry["sender_id"] = sender_id
-        db_entry["recipient_id"] = recipient_id
 
-        message_id = db.create_message(self.db_conn, db_entry)
+        new_db_entry["sender_id"] = sender_id
+        new_db_entry["recipient_id"] = recipient_id
+
+        message_id = db.create_message(self.db_conn, new_db_entry)
         resp.location = f"/{message_id}"
         resp.body = json.dumps(message)
         resp.status = falcon.HTTP_201

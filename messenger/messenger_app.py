@@ -37,7 +37,7 @@ class MessengerResource():
 
         if invalidate_no_recipient or invalidate_no_sender:
             resp.body = json.dumps({
-                "message": "sender AND recipient are required params"})
+                "message": "sender AND recipient are required parameters"})
             resp.status = falcon.HTTP_400
 
         if message_id:
@@ -65,6 +65,9 @@ class MessengerResource():
             resp.body = json.dumps([
                 self._format_message(self.db_conn, msg) for msg in messages
             ])
+            if not messages:
+                resp.status = falcon.HTTP_404
+                resp.body = json.dumps({"error": "no messages in DB"})
         else:
             print("retrieving message stream for "\
                   f"sender[{req.params['sender']}] and "\
@@ -89,9 +92,25 @@ class MessengerResource():
         :param resp: the Falcon response object
         :return: a status code and message location header
         """
-        resp.body = json.dumps({
-            "message": "POST request received!"
-        })
+        message = req.media
+        print(f"creating new message: {message}")
+
+        db_entry = {"message": message["message"]}
+        sender_id = db.select_user_id_by_name(
+            self.db_conn, message['sender'])['id']
+        recipient_id = db.select_user_id_by_name(
+            self.db_conn, message['recipient'])['id']
+        if not sender_id:
+            sender_id = db.create_user(self.db_conn, message['sender'])
+        if not recipient_id:
+            recipient_id = db.create_user(self.db_conn, message['recipient'])
+        db_entry["sender_id"] = sender_id
+        db_entry["recipient_id"] = recipient_id
+
+        message_id = db.create_message(self.db_conn, db_entry)
+        resp.location = f"/{message_id}"
+        resp.body = json.dumps(message)
+        resp.status = falcon.HTTP_201
 
     @staticmethod
     def _format_message(db_conn, message):
@@ -105,7 +124,7 @@ class MessengerResource():
                 db_conn, message['sender_id'])['name'],
             "recipient": db.select_user_name_by_id(
                 db_conn, message['recipient_id'])['name'],
-            "content": message['content'],
+            "message": message['content'],
             "message_date": message['creation_date']
         }
 

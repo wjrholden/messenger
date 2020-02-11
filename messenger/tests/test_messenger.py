@@ -30,7 +30,19 @@ def test_messenger_apis():
 
 
 def test_messenger_limit():
-    pass
+    """
+    exercises the limit query param functionality
+    """
+    all_messages_resp = requests.get(BASE_URL)
+    all_messages = all_messages_resp.json()
+    total_message_count = len(all_messages)
+    message_limit = total_message_count // 2
+
+    query_params = {"limit": message_limit}
+    limit_resp = requests.get(BASE_URL, params=query_params)
+    limited_messages = limit_resp.json()
+    assert limit_resp.status_code == 200
+    assert len(limited_messages) == message_limit
 
 
 def _generate_test_message():

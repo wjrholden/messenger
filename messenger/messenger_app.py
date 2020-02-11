@@ -63,8 +63,7 @@ class MessengerResource():
                 messages = self._filter_messages_by_range(
                     messages, req.params['range'])
             resp.body = json.dumps([
-                self._format_message(self.db_conn, msg) for msg in messages
-            ])
+                self._format_message(self.db_conn, msg) for msg in messages])
             if not messages:
                 resp.status = falcon.HTTP_404
                 resp.body = json.dumps({"error": "no messages in DB"})
@@ -113,6 +112,7 @@ class MessengerResource():
         new_db_entry["recipient_id"] = recipient_id
 
         message_id = db.create_message(self.db_conn, new_db_entry)
+        print(f"message created successfully with ID: {message_id}")
         resp.location = f"/{message_id}"
         resp.body = json.dumps(message)
         resp.status = falcon.HTTP_201

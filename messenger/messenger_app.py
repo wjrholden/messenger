@@ -77,8 +77,11 @@ class MessengerResource():
             print("retrieving message stream for "\
                   f"sender[{req.params['sender']}] and "\
                   f"recipient[{req.params['recipient']}]")
+            sender_name = req.params['sender']
+            recipient_name = req.params['recipient']
+
             messages = db.select_messages_by_recipient_and_sender(
-                self.db_conn, req.params['recipient'], req.params['sender'])
+                self.db_conn, recipient_name, sender_name)
             if enable_message_limit:
                 limit = int(req.params['limit'])
                 print(f"limiting messages to {limit} most recent")
@@ -86,9 +89,17 @@ class MessengerResource():
             if enable_message_range:
                 messages = self._filter_messages_by_range(
                     messages, req.params['range'])
-            resp.body = json.dumps([
-                self._format_message(self.db_conn, msg) for msg in messages
-            ])
+
+            if messages:
+                resp.body = json.dumps([
+                    self._format_message(self.db_conn, msg) for msg in messages
+                ])
+            else:
+                resp.body = json.dumps({
+                    "not_found": "no messages found between requested users " \
+                                 f"sender[{sender_name}] and " \
+                                 f"recipient[{recipient_name}]"})
+                resp.status = falcon.HTTP_404
 
     def on_post(self, req, resp):
         """

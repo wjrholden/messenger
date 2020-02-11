@@ -1,4 +1,5 @@
 import json
+from datetime import datetime, timedelta
 
 import falcon
 
@@ -12,6 +13,9 @@ https://falcon.readthedocs.io/en/stable/user/quickstart.html
 class MessengerResource():
 
     def __init__(self, db_conn):
+        """
+        On Falcon startup, create connection to local database
+        """
         self.db_conn = db_conn
 
     def on_get(self, req, resp, message_id=None):
@@ -22,6 +26,20 @@ class MessengerResource():
         :param message_id: optional, an ID of a message
         :return: a status code and message body
         """
+        enable_message_limit = 'limit' in req.params
+        enable_message_range = 'range' in req.params
+        is_single_message_stream = 'sender' in req.params \
+                                   and 'recipient' in req.params
+        invalidate_no_sender = 'recipient' in req.params \
+                               and 'sender' not in req.params
+        invalidate_no_recipient = 'sender' in req.params \
+                                  and 'recipient' not in req.params
+
+        if invalidate_no_recipient or invalidate_no_sender:
+            resp.body = json.dumps({
+                "message": "sender AND recipient are required params"})
+            resp.status = falcon.HTTP_400
+
         if message_id:
             print(f"request received for message with ID: {message_id}")
             message = db.get_message_by_id(self.db_conn, message_id)
@@ -31,17 +49,38 @@ class MessengerResource():
                     self._format_message(self.db_conn, message))
             else:
                 print(f"no messages found with ID: {message_id}")
-                resp.status = falcon.HTTP_404
                 resp.body = json.dumps({
                     "error": f"no messages found with ID: {message_id}"})
-        elif not req.params:
-            print("no query params requested, retrieving all messages")
+                resp.status = falcon.HTTP_404
+        elif not is_single_message_stream:
+            print("retrieving all messages")
             messages = db.get_all_messages(self.db_conn)
+            if enable_message_limit:
+                limit = int(req.params['limit'])
+                print(f"limiting messages to {limit} most recent")
+                messages = messages[-limit:]
+            if enable_message_range:
+                messages = self._filter_messages_by_range(
+                    messages, req.params['range'])
             resp.body = json.dumps([
                 self._format_message(self.db_conn, msg) for msg in messages
             ])
         else:
-            print(f"query params = {req.params}")
+            print("retrieving message stream for "\
+                  f"sender[{req.params['sender']}] and "\
+                  f"recipient[{req.params['recipient']}]")
+            messages = db.select_messages_by_recipient_and_sender(
+                self.db_conn, req.params['recipient'], req.params['sender'])
+            if enable_message_limit:
+                limit = int(req.params['limit'])
+                print(f"limiting messages to {limit} most recent")
+                messages = messages[-limit:]
+            if enable_message_range:
+                messages = self._filter_messages_by_range(
+                    messages, req.params['range'])
+            resp.body = json.dumps([
+                self._format_message(self.db_conn, msg) for msg in messages
+            ])
 
     def on_post(self, req, resp):
         """
@@ -58,6 +97,7 @@ class MessengerResource():
     def _format_message(db_conn, message):
         """
         converts the message dict and populates user names
+        :param db_conn: the DB connection
         :param message: a message row from the DB
         """
         return {
@@ -68,6 +108,22 @@ class MessengerResource():
             "content": message['content'],
             "message_date": message['creation_date']
         }
+
+    @staticmethod
+    def _filter_messages_by_range(messages, message_range):
+        """
+        Removes messages older than the provided range day
+        :param messages: an array of messages
+        :param message_range: a str indicating a day range
+        """
+        day_range = int(message_range.replace('d', ''))
+        print(f"filtering messages older than {day_range} days old")
+        oldest_date = datetime.today() - timedelta(days=day_range)
+        for index, message in enumerate(messages):
+            message_date = datetime.fromisoformat(message['creation_date'])
+            if message_date < oldest_date:
+                messages.pop(index)
+        return messages
 
 
 database_file = "messenger.db"

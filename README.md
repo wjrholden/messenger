@@ -9,3 +9,6 @@ An API for sending short text messages between individual users
 * https://www.sqlitetutorial.net/sqlite-python/
 * https://falcon.readthedocs.io/en/stable/user/quickstart.html
 * https://realpython.com/absolute-vs-relative-python-imports/
+* https://docs.pytest.org/en/latest/getting-started.html
+* https://requests.readthedocs.io/en/master/
+* https://pypi.org/project/randomwordgenerator/

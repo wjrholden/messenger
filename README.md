@@ -37,8 +37,10 @@ An API for sending short text messages between individual users
 
 ## Invoking and exercising the Messenger APIs:
 * Complete OpenAPI/Swagger v2 specification can be found in `api.yml` in the base project directory
+
 ### API usage examples:
 __NOTE:__ Using [Postman](https://www.postman.com/downloads/) is highly recommended for convenience and readability of API responses
+
 * Retrieving all test messages in database:
     * Using Postman: 
         1. Open a new request tab and set HTTP method to GET
@@ -46,6 +48,7 @@ __NOTE:__ Using [Postman](https://www.postman.com/downloads/) is highly recommen
         3. Hit the `Send` button, "pretty" JSON response will appear in `Body` response section containing all test messages in the database
     * Using curl: `$ curl "127.0.0.1:8000/messages"`
         * Postman is recommended because it will "pretty-ify" the JSON response body
+
 * Creating a new message (using Postman):
     1. Open a new request tab
     2. Set HTTP method to POST and set URL to `127.0.0.1:8000/messages`
@@ -61,11 +64,12 @@ __NOTE:__ Using [Postman](https://www.postman.com/downloads/) is highly recommen
     5. Hit the `Send` button, the provided message input will be returned in the response `Body` section with a `201 Created` status code and a `location` header with a relative URI containing an ID for retrieving the created message
     6. Retrieve the created message at the following parameterized URL
         * `127.0.0.1:8000/messages/{message_id}`
-* Retrieving messages to a specific recipient from a specific sender:
-    * Two following two query parameters must BOTH be supplied to retrieve messages from a given sender to a given recipient:
+
+* Retrieving messages from a specific sender to a specific recipient:
+    * The following two query parameters must BOTH be supplied to retrieve messages from a given sender to a given recipient:
         * `sender={user}` and `recipient={user}`, 
         * e.g. `127.0.0.1:8000/messages?sender={user}&recipient={user}`
-    * (additional usage documentation coming soon)
+
 * Additional query parameters and their usage:
     * The `limit` query parameter will return a limited count of the `{int}` most recent messages 
         * `limit={int}`
@@ -73,7 +77,6 @@ __NOTE:__ Using [Postman](https://www.postman.com/downloads/) is highly recommen
     * The `range` query parameter will return messages from the last `{int}` number of days
         * `range={int}d` or `range={int}` 
         * e.g. `127.0.0.1:8000/messages?range=5d`
-    * (additional usage documentation coming soon)
 
 ## Resources referenced:
 ### Documentation - 
